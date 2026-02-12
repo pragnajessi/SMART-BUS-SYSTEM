@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time GPS Tracking - Smart Bus Management</title>
+    <link rel="stylesheet" href="css/gps-style.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
+</head>
+<body>
+    <div class="gps-container">
+        <!-- Sidebar -->
+        <aside class="gps-sidebar">
+            <div class="sidebar-header">
+                <h2>🗺️ GPS Tracking</h2>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="searchBus" placeholder="Search bus..." onkeyup="searchBuses()">
+            </div>
+
+            <div class="buses-list">
+                <h3>Active Buses</h3>
+                <div id="busesList" class="buses-items"></div>
+            </div>
+
+            <div class="bus-info" id="busInfo" style="display: none;">
+                <h3>Bus Details</h3>
+                <div id="busDetailsContent"></div>
+            </div>
+        </aside>
+
+        <!-- Map Container -->
+        <main class="gps-main">
+            <div id="map" class="map-container"></div>
+
+            <!-- GPS Controls -->
+            <div class="gps-controls">
+                <button onclick="centerMap()" class="control-btn" title="Center Map">📍</button>
+                <button onclick="toggleTracking()" class="control-btn" title="Toggle Tracking">🔄</button>
+                <button onclick="zoomIn()" class="control-btn" title="Zoom In">🔍+</button>
+                <button onclick="zoomOut()" class="control-btn" title="Zoom Out">🔍-</button>
+            </div>
+
+            <!-- Bus Info Popup -->
+            <div id="busPopup" class="bus-popup hidden">
+                <div class="popup-content">
+                    <span class="close-popup" onclick="closeBusPopup()">&times;</span>
+                    <h3 id="popupBusNumber"></h3>
+                    <div id="popupBusInfo"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/gps-tracking.js"></script>
+</body>
+</html>

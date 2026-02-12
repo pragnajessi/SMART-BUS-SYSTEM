@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Checkout - Smart Bus Management</title>
+    <link rel="stylesheet" href="css/payment-style.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <div class="payment-container">
+        <div class="payment-header">
+            <h1>🎫 Booking & Payment</h1>
+        </div>
+
+        <div class="payment-grid">
+            <!-- Booking Summary -->
+            <div class="booking-summary">
+                <h2>Booking Summary</h2>
+                <div class="summary-card">
+                    <div class="summary-item">
+                        <label>Bus Number:</label>
+                        <p id="summaryBusNumber">-</p>
+                    </div>
+                    <div class="summary-item">
+                        <label>Route:</label>
+                        <p id="summaryRoute">-</p>
+                    </div>
+                    <div class="summary-item">
+                        <label>Seat Number:</label>
+                        <p id="summarySeatNumber">-</p>
+                    </div>
+                    <div class="summary-item">
+                        <label>Travel Date:</label>
+                        <p id="summaryDate">-</p>
+                    </div>
+                    <div class="summary-item">
+                        <label>Passenger Name:</label>
+                        <p id="summaryPassenger">-</p>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-item total">
+                        <label>Total Amount:</label>
+                        <p id="summaryAmount">₹0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="payment-methods">
+                <h2>Select Payment Method</h2>
+                
+                <div class="method-tabs">
+                    <button class="method-tab active" onclick="switchPaymentMethod('card')">💳 Card</button>
+                    <button class="method-tab" onclick="switchPaymentMethod('upi')">📱 UPI</button>
+                    <button class="method-tab" onclick="switchPaymentMethod('wallet')">👛 Wallet</button>
+                </div>
+
+                <!-- Card Payment -->
+                <form id="cardPaymentForm" class="payment-form">
+                    <h3>Debit/Credit Card</h3>
+                    <input type="text" id="cardName" placeholder="Cardholder Name" required>
+                    <input type="email" id="cardEmail" placeholder="Email Address" required>
+                    <input type="tel" id="cardPhone" placeholder="Phone Number" required>
+                    <input type="text" id="cardNumber" placeholder="Card Number" pattern="\d{16}" required>
+                    <div class="card-row">
+                        <input type="text" id="cardExpiry" placeholder="MM/YY" pattern="\d{2}/\d{2}" required>
+                        <input type="text" id="cardCVV" placeholder="CVV" pattern="\d{3,4}" required>
+                    </div>
+                    <button type="submit" class="payment-btn">Pay with Razorpay</button>
+                </form>
+
+                <!-- UPI Payment -->
+                <form id="upiPaymentForm" class="payment-form hidden">
+                    <h3>UPI Payment</h3>
+                    <input type="email" id="upiId" placeholder="UPI ID (user@bank)" required>
+                    <input type="email" id="upiEmail" placeholder="Email Address" required>
+                    <input type="tel" id="upiPhone" placeholder="Phone Number" required>
+                    <button type="submit" class="payment-btn">Pay with UPI</button>
+                </form>
+
+                <!-- Wallet Payment -->
+                <div id="walletPaymentForm" class="payment-form hidden">
+                    <h3>Pay from Wallet</h3>
+                    <div class="wallet-info">
+                        <p>Current Balance: <strong id="walletBalance">₹0</strong></p>
+                    </div>
+                    <div class="wallet-actions">
+                        <button onclick="openAddMoneyModal()" class="secondary-btn">+ Add Money</button>
+                        <button onclick="submitWalletPayment()" class="payment-btn" id="walletPayBtn" disabled>Pay ₹<span id="walletAmount">0</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Money Modal -->
+        <div id="addMoneyModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close" onclick="closeAddMoneyModal()">&times;</span>
+                <h2>Add Money to Wallet</h2>
+                <form id="addMoneyForm" onsubmit="addMoneyToWallet(event)">
+                    <input type="number" id="addAmount" placeholder="Amount" min="100" step="100" required>
+                    <p id="addMoneyError" class="error-message"></p>
+                    <button type="submit" class="payment-btn">Add Money</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/payment-checkout.js"></script>
+</body>
+</html>

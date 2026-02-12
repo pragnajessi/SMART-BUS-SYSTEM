@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Smart Bus Management</title>
+    <link rel="stylesheet" href="css/admin-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="adminApp" class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h2>🚌 Admin Panel</h2>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#" onclick="showAdminPage('dashboard')" class="menu-item active">📊 Dashboard</a>
+                <a href="#" onclick="showAdminPage('buses')" class="menu-item">🚌 Manage Buses</a>
+                <a href="#" onclick="showAdminPage('users')" class="menu-item">👥 Manage Users</a>
+                <a href="#" onclick="showAdminPage('payments')" class="menu-item">💳 Payments</a>
+                <a href="#" onclick="showAdminPage('analytics')" class="menu-item">📈 Analytics</a>
+                <a href="#" onclick="showAdminPage('reports')" class="menu-item">📋 Reports</a>
+                <a href="#" onclick="showAdminPage('logs')" class="menu-item">📝 Activity Logs</a>
+                <a href="#" onclick="logoutAdmin()" class="menu-item logout">🚪 Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Top Navigation Bar -->
+            <div class="admin-header">
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="admin-profile">
+                    <span id="adminName">Admin User</span>
+                    <img src="https://via.placeholder.com/40" alt="Profile">
+                </div>
+            </div>
+
+            <!-- Dashboard Page -->
+            <section id="dashboard" class="admin-page">
+                <div class="dashboard-grid">
+                    <!-- Stats Cards -->
+                    <div class="stat-card">
+                        <div class="stat-icon buses">🚌</div>
+                        <div class="stat-content">
+                            <h3>Total Buses</h3>
+                            <p class="stat-value" id="totalBuses">0</p>
+                            <span class="stat-subtitle" id="activeBuses">0 Active</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon users">👥</div>
+                        <div class="stat-content">
+                            <h3>Total Users</h3>
+                            <p class="stat-value" id="totalUsers">0</p>
+                            <span class="stat-subtitle">Registered Users</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon bookings">🎫</div>
+                        <div class="stat-content">
+                            <h3>Total Bookings</h3>
+                            <p class="stat-value" id="totalBookings">0</p>
+                            <span class="stat-subtitle" id="confirmedBookings">0 Confirmed</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon revenue">💰</div>
+                        <div class="stat-content">
+                            <h3>Total Revenue</h3>
+                            <p class="stat-value" id="totalRevenue">₹0</p>
+                            <span class="stat-subtitle" id="todayRevenue">Today: ₹0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Revenue Trend (Last 30 Days)</h3>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>Payment Methods</h3>
+                        <canvas id="paymentMethodChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>Booking Status</h3>
+                        <canvas id="bookingStatusChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>Seat Utilization</h3>
+                        <canvas id="seatUtilizationChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Buses Management Page -->
+            <section id="buses" class="admin-page hidden">
+                <div class="page-header">
+                    <h2>Manage Buses</h2>
+                    <button onclick="openBusModal()" class="btn-primary">+ Add New Bus</button>
+                </div>
+
+                <div class="filters">
+                    <input type="text" id="busSearch" placeholder="Search by bus number..." onkeyup="searchBuses()">
+                    <select id="busStatusFilter" onchange="filterBuses()">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Bus Number</th>
+                                <th>Driver</th>
+                                <th>Route</th>
+                                <th>Total Seats</th>
+                                <th>Reserved</th>
+                                <th>Available</th>
+                                <th>Status</th>
+                                <th>Location</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="busesTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Users Management Page -->
+            <section id="users" class="admin-page hidden">
+                <div class="page-header">
+                    <h2>Manage Users</h2>
+                </div>
+
+                <div class="filters">
+                    <input type="text" id="userSearch" placeholder="Search by name or email..." onkeyup="searchUsers()">
+                    <select id="userTypeFilter" onchange="filterUsers()">
+                        <option value="">All Users</option>
+                        <option value="passenger">Passenger</option>
+                        <option value="driver">Driver</option>
+                        <option value="worker">Worker</option>
+                    </select>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Gender</th>
+                                <th>Type</th>
+                                <th>Bookings</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Payments Management Page -->
+            <section id="payments" class="admin-page hidden">
+                <div class="page-header">
+                    <h2>Payment Management</h2>
+                </div>
+
+                <div class="filters">
+                    <select id="paymentStatusFilter" onchange="filterPayments()">
+                        <option value="">All Payments</option>
+                        <option value="completed">Completed</option>
+                        <option value="pending">Pending</option>
+                        <option value="failed">Failed</option>
+                        <option value="refunded">Refunded</option>
+                    </select>
+                    <select id="paymentMethodFilter" onchange="filterPayments()">
+                        <option value="">All Methods</option>
+                        <option value="card">Card</option>
+                        <option value="upi">UPI</option>
+                        <option value="wallet">Wallet</option>
+                    </select>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Analytics Page -->
+            <section id="analytics" class="admin-page hidden">
+                <div class="page-header">
+                    <h2>Analytics & Insights</h2>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>Revenue Analytics</h3>
+                        <div class="metric-group">
+                            <div class="metric">
+                                <label>Total Revenue</label>
+                                <p id="analyticsRevenue">₹0</p>
+                            </div>
+                            <div class="metric">
+                                <label>Total Transactions</label>
+                                <p id="analyticsTxns">0</p>
+                            </div>
+                            <div class="metric">
+                                <label>Average Transaction</label>
+                                <p id="analyticsAvgTxn">₹0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <h3>Booking Analytics</h3>
+                        <div class="metric-group">
+                            <div class="metric">
+                                <label>Total Bookings</label>
+                                <p id="analyticsBookings">0</p>
+                            </div>
+                            <div class="metric">
+                                <label>Confirmed</label>
+                                <p id="analyticsConfirmed">0</p>
+                            </div>
+                            <div class="metric">
+                                <label>Pending</label>
+                                <p id="analyticsPending">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container" style="margin-top: 2rem;">
+                    <h3>Revenue by Payment Method (Last 30 Days)</h3>
+                    <canvas id="methodChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Reports Page -->
+            <section id="reports" class="admin-page hidden">
+                <div class="page-header">
+                    <h2>System Reports</h2>
+                    <button onclick="generateDailyReport()" class="btn-primary">Generate Daily Report</button>
+                </div>
+
+                <div class="reports-grid">
+                    <div class="report-card">
+                        <h3>Latest Daily Report</h3>
+                        <div id="latestReportContent" class="report-content">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Activity Logs Page -->
+            <section id="logs" class="admin-page hidden">
+                <div class="page-header">
+                    <h2>Activity Logs</h2>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Admin</th>
+                                <th>Action</th>
+                                <th>Entity</th>
+                                <th>Changes</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Bus Modal -->
+    <div id="busModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeBusModal()">&times;</span>
+            <h2>Add/Edit Bus</h2>
+            <form id="busForm" onsubmit="saveBus(event)">
+                <input type="text" id="busNumber" placeholder="Bus Number" required>
+                <input type="text" id="driverName" placeholder="Driver Name" required>
+                <input type="tel" id="driverPhone" placeholder="Driver Phone" required>
+                <input type="text" id="busRoute" placeholder="Route" required>
+                <input type="number" id="totalSeats" placeholder="Total Seats" value="50">
+                <button type="submit">Save Bus</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/admin-api.js"></script>
+    <script src="js/admin-app.js"></script>
+</body>
+</html>

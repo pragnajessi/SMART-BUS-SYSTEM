@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Bus Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <h1>🚌 Smart Bus Management</h1>
+            </div>
+            <ul class="navbar-menu" id="navMenu">
+                <li><a href="#" onclick="showPage('home')">Home</a></li>
+                <li><a href="#" onclick="showPage('buses')">Buses</a></li>
+                <li><a href="#" onclick="showPage('reservations')">My Reservations</a></li>
+                <li><a href="#" onclick="showPage('alerts')">My Alerts</a></li>
+                <li><a href="#" onclick="showPage('lost-found')">Lost & Found</a></li>
+                <li><a href="#" onclick="showPage('emergency')">Emergency</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Home Page -->
+            <section id="home" class="page hidden">
+                <div class="hero">
+                    <h2>Welcome to Smart Bus Management System</h2>
+                    <p>Your journey, made smarter and safer</p>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <h3>🪑 Seat Reservations</h3>
+                            <p>Reserve your seat in advance with women security features</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>📍 GPS Announcements</h3>
+                            <p>Get announcements 2 minutes before and after each stop</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>⏰ Wake-up Alerts</h3>
+                            <p>Never miss your stop with automatic alerts</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>🆘 Emergency Help</h3>
+                            <p>One-click emergency alert system for urgent situations</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>🔍 Lost & Found</h3>
+                            <p>Report lost items and track found belongings</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Authentication Pages -->
+            <section id="auth" class="page">
+                <div class="auth-container">
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="switchAuthTab('login')">Login</button>
+                        <button class="tab-btn" onclick="switchAuthTab('register')">Register</button>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form id="loginForm" class="auth-form">
+                        <h2>Login</h2>
+                        <input type="email" id="loginEmail" placeholder="Email" required>
+                        <input type="password" id="loginPassword" placeholder="Password" required>
+                        <button type="submit">Login</button>
+                        <p id="loginError" class="error-message"></p>
+                    </form>
+
+                    <!-- Register Form -->
+                    <form id="registerForm" class="auth-form hidden">
+                        <h2>Register</h2>
+                        <input type="text" id="registerName" placeholder="Full Name" required>
+                        <input type="email" id="registerEmail" placeholder="Email" required>
+                        <input type="tel" id="registerPhone" placeholder="Phone Number" required>
+                        <select id="registerGender" required>
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <input type="password" id="registerPassword" placeholder="Password" required>
+                        <input type="password" id="registerConfirmPassword" placeholder="Confirm Password" required>
+                        <button type="submit">Register</button>
+                        <p id="registerError" class="error-message"></p>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Buses Page -->
+            <section id="buses" class="page hidden">
+                <h2>Available Buses</h2>
+                <div id="busesContainer" class="buses-grid"></div>
+            </section>
+
+            <!-- Bus Details Modal -->
+            <div id="busModal" class="modal hidden">
+                <div class="modal-content">
+                    <span class="close" onclick="closeBusModal()">&times;</span>
+                    <h2 id="busModalTitle"></h2>
+                    <div id="busModalBody"></div>
+                </div>
+            </div>
+
+            <!-- Seat Reservation Page -->
+            <section id="reservations" class="page hidden">
+                <h2>Your Reservations</h2>
+                <div id="reservationsContainer" class="reservations-list"></div>
+            </section>
+
+            <!-- Wake-up Alerts Page -->
+            <section id="alerts" class="page hidden">
+                <h2>Your Wake-up Alerts</h2>
+                <form id="alertForm" class="form-card">
+                    <h3>Create New Alert</h3>
+                    <select id="alertBusId" required>
+                        <option value="">Select Bus</option>
+                    </select>
+                    <input type="text" id="alertStopName" placeholder="Stop Name" required>
+                    <input type="number" id="alertStopLat" placeholder="Stop Latitude" step="0.0001" required>
+                    <input type="number" id="alertStopLng" placeholder="Stop Longitude" step="0.0001" required>
+                    <input type="number" id="alertBeforeTime" placeholder="Alert Before (seconds)" value="120">
+                    <button type="submit">Create Alert</button>
+                </form>
+                <div id="alertsContainer" class="alerts-list"></div>
+            </section>
+
+            <!-- Lost & Found Page -->
+            <section id="lost-found" class="page hidden">
+                <h2>Lost & Found</h2>
+                
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchLostFoundTab('report')">Report Lost Item</button>
+                    <button class="tab-btn" onclick="switchLostFoundTab('browse')">Browse Found Items</button>
+                </div>
+
+                <!-- Report Lost Item Form -->
+                <form id="reportLostForm" class="form-card">
+                    <h3>Report Lost Item</h3>
+                    <input type="text" id="lostItemName" placeholder="Item Name" required>
+                    <textarea id="lostItemDescription" placeholder="Item Description" required></textarea>
+                    <input type="text" id="lostBusNumber" placeholder="Bus Number (optional)">
+                    <button type="submit">Report Lost Item</button>
+                </form>
+
+                <!-- Browse Found Items -->
+                <div id="foundItemsContainer" class="items-grid hidden"></div>
+            </section>
+
+            <!-- Emergency Page -->
+            <section id="emergency" class="page hidden">
+                <div class="emergency-container">
+                    <h2>Emergency Alert System</h2>
+                    <div class="emergency-info">
+                        <p>In case of emergency, click the button below to alert authorities</p>
+                    </div>
+                    
+                    <form id="emergencyForm" class="form-card">
+                        <select id="emergencyType" required>
+                            <option value="">Select Emergency Type</option>
+                            <option value="accident">Accident</option>
+                            <option value="medical">Medical Emergency</option>
+                            <option value="security">Security Issue</option>
+                            <option value="mechanical">Mechanical Failure</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <textarea id="emergencyDescription" placeholder="Describe the emergency"></textarea>
+                        <button type="submit" class="emergency-btn">🆘 REPORT EMERGENCY</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
