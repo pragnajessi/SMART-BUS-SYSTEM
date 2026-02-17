@@ -16,41 +16,41 @@
             <ul class="navbar-menu" id="navMenu">
                 <li><a href="#" onclick="showPage('home')">Home</a></li>
                 <li><a href="#" onclick="showPage('buses')">Buses</a></li>
-                <li><a href="#" onclick="showPage('reservations')">My Reservations</a></li>
-                <li><a href="#" onclick="showPage('alerts')">My Alerts</a></li>
-                <li><a href="#" onclick="showPage('lost-found')">Lost & Found</a></li>
+                <li><a href="#" onclick="showPage('dashboard')">Dashboard</a></li>
+                <li><a href="#" onclick="showPage('wallet')">Wallet</a></li>
+                <li><a href="#" onclick="showPage('booking')">Booking</a></li>
                 <li><a href="#" onclick="showPage('emergency')">Emergency</a></li>
-                <li><a href="#" onclick="logout()">Logout</a></li>
+                <li><a href="#" onclick="showPage('lost-found')">Lost & Found</a></li>
+                <li id="userMenu" style="display: none;">
+                    <span id="userName"></span>
+                    <a href="#" onclick="logoutUser()">Logout</a>
+                </li>
             </ul>
         </nav>
 
         <!-- Main Content -->
         <main class="main-content">
             <!-- Home Page -->
-            <section id="home" class="page hidden">
+            <section id="home" class="page">
                 <div class="hero">
                     <h2>Welcome to Smart Bus Management System</h2>
                     <p>Your journey, made smarter and safer</p>
                     <div class="features-grid">
                         <div class="feature-card">
-                            <h3>🪑 Seat Reservations</h3>
-                            <p>Reserve your seat in advance with women security features</p>
+                            <h3>🚌 Bus Booking</h3>
+                            <p>Real-time seat availability and instant booking</p>
                         </div>
                         <div class="feature-card">
-                            <h3>📍 GPS Announcements</h3>
-                            <p>Get announcements 2 minutes before and after each stop</p>
+                            <h3>📍 GPS Tracking</h3>
+                            <p>Real-time GPS tracking for every bus</p>
                         </div>
                         <div class="feature-card">
-                            <h3>⏰ Wake-up Alerts</h3>
-                            <p>Never miss your stop with automatic alerts</p>
+                            <h3>💳 Secure Payment</h3>
+                            <p>Safe payment with wallet integration</p>
                         </div>
                         <div class="feature-card">
                             <h3>🆘 Emergency Help</h3>
-                            <p>One-click emergency alert system for urgent situations</p>
-                        </div>
-                        <div class="feature-card">
-                            <h3>🔍 Lost & Found</h3>
-                            <p>Report lost items and track found belongings</p>
+                            <p>One-click emergency alert system</p>
                         </div>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
                     </div>
 
                     <!-- Login Form -->
-                    <form id="loginForm" class="auth-form">
+                    <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
                         <h2>Login</h2>
                         <input type="email" id="loginEmail" placeholder="Email" required>
                         <input type="password" id="loginPassword" placeholder="Password" required>
@@ -74,7 +74,7 @@
                     </form>
 
                     <!-- Register Form -->
-                    <form id="registerForm" class="auth-form hidden">
+                    <form id="registerForm" class="auth-form hidden" onsubmit="handleRegister(event)">
                         <h2>Register</h2>
                         <input type="text" id="registerName" placeholder="Full Name" required>
                         <input type="email" id="registerEmail" placeholder="Email" required>
@@ -93,81 +93,85 @@
                 </div>
             </section>
 
+            <!-- Dashboard Page -->
+            <section id="dashboard" class="page hidden">
+                <h2>Dashboard</h2>
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <h3>👥 Total Users</h3>
+                        <p class="stat-value" id="statTotalUsers">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>🚌 Total Buses</h3>
+                        <p class="stat-value" id="statTotalBuses">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>🎫 Total Bookings</h3>
+                        <p class="stat-value" id="statTotalBookings">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>💰 Total Revenue</h3>
+                        <p class="stat-value" id="statTotalRevenue">₹0</p>
+                    </div>
+                </div>
+            </section>
+
             <!-- Buses Page -->
             <section id="buses" class="page hidden">
                 <h2>Available Buses</h2>
                 <div id="busesContainer" class="buses-grid"></div>
             </section>
 
-            <!-- Bus Details Modal -->
-            <div id="busModal" class="modal hidden">
-                <div class="modal-content">
-                    <span class="close" onclick="closeBusModal()">&times;</span>
-                    <h2 id="busModalTitle"></h2>
-                    <div id="busModalBody"></div>
+            <!-- Wallet Page -->
+            <section id="wallet" class="page hidden">
+                <h2>My Wallet</h2>
+                <div class="wallet-container">
+                    <div class="wallet-card">
+                        <h3>💳 Wallet Balance</h3>
+                        <p class="wallet-balance" id="walletBalance">₹0</p>
+                        <button onclick="showAddMoneyForm()" class="btn-primary">+ Add Money</button>
+                    </div>
+                    <div id="addMoneyForm" class="form-card hidden">
+                        <h3>Add Money</h3>
+                        <input type="number" id="addAmount" placeholder="Amount" min="100">
+                        <button onclick="handleAddMoney()" class="btn-primary">Add</button>
+                    </div>
+                    <div class="transactions-container">
+                        <h3>Recent Transactions</h3>
+                        <div id="transactionsTable"></div>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Seat Reservation Page -->
-            <section id="reservations" class="page hidden">
-                <h2>Your Reservations</h2>
-                <div id="reservationsContainer" class="reservations-list"></div>
             </section>
 
-            <!-- Wake-up Alerts Page -->
-            <section id="alerts" class="page hidden">
-                <h2>Your Wake-up Alerts</h2>
-                <form id="alertForm" class="form-card">
-                    <h3>Create New Alert</h3>
-                    <select id="alertBusId" required>
-                        <option value="">Select Bus</option>
-                    </select>
-                    <input type="text" id="alertStopName" placeholder="Stop Name" required>
-                    <input type="number" id="alertStopLat" placeholder="Stop Latitude" step="0.0001" required>
-                    <input type="number" id="alertStopLng" placeholder="Stop Longitude" step="0.0001" required>
-                    <input type="number" id="alertBeforeTime" placeholder="Alert Before (seconds)" value="120">
-                    <button type="submit">Create Alert</button>
-                </form>
-                <div id="alertsContainer" class="alerts-list"></div>
-            </section>
-
-            <!-- Lost & Found Page -->
-            <section id="lost-found" class="page hidden">
-                <h2>Lost & Found</h2>
-                
-                <div class="tabs">
-                    <button class="tab-btn active" onclick="switchLostFoundTab('report')">Report Lost Item</button>
-                    <button class="tab-btn" onclick="switchLostFoundTab('browse')">Browse Found Items</button>
+            <!-- Booking Page -->
+            <section id="booking" class="page hidden">
+                <h2>Book a Bus</h2>
+                <div class="booking-container">
+                    <div class="step">
+                        <h3>Step 1: Select Bus</h3>
+                        <div id="bookingBusesList"></div>
+                    </div>
+                    <div class="step">
+                        <h3>Step 2: Select Seat</h3>
+                        <div id="bookingSeats"></div>
+                    </div>
+                    <div class="step">
+                        <h3>Step 3: Confirm</h3>
+                        <button onclick="confirmBooking()" class="btn-primary">Confirm Booking</button>
+                    </div>
                 </div>
-
-                <!-- Report Lost Item Form -->
-                <form id="reportLostForm" class="form-card">
-                    <h3>Report Lost Item</h3>
-                    <input type="text" id="lostItemName" placeholder="Item Name" required>
-                    <textarea id="lostItemDescription" placeholder="Item Description" required></textarea>
-                    <input type="text" id="lostBusNumber" placeholder="Bus Number (optional)">
-                    <button type="submit">Report Lost Item</button>
-                </form>
-
-                <!-- Browse Found Items -->
-                <div id="foundItemsContainer" class="items-grid hidden"></div>
             </section>
 
             <!-- Emergency Page -->
             <section id="emergency" class="page hidden">
                 <div class="emergency-container">
-                    <h2>Emergency Alert System</h2>
-                    <div class="emergency-info">
-                        <p>In case of emergency, click the button below to alert authorities</p>
-                    </div>
-                    
-                    <form id="emergencyForm" class="form-card">
+                    <h2>Emergency Alert</h2>
+                    <form id="emergencyForm" class="form-card" onsubmit="reportEmergency(event)">
                         <select id="emergencyType" required>
                             <option value="">Select Emergency Type</option>
                             <option value="accident">Accident</option>
                             <option value="medical">Medical Emergency</option>
                             <option value="security">Security Issue</option>
-                            <option value="mechanical">Mechanical Failure</option>
                             <option value="other">Other</option>
                         </select>
                         <textarea id="emergencyDescription" placeholder="Describe the emergency"></textarea>
@@ -175,10 +179,31 @@
                     </form>
                 </div>
             </section>
+
+            <!-- Lost & Found Page -->
+            <section id="lost-found" class="page hidden">
+                <h2>Lost & Found</h2>
+                <div class="lost-found-container">
+                    <form id="reportLostForm" class="form-card" onsubmit="reportLostItem(event)">
+                        <h3>Report Lost Item</h3>
+                        <input type="text" id="lostItemName" placeholder="Item Name" required>
+                        <textarea id="lostItemDescription" placeholder="Item Description" required></textarea>
+                        <button type="submit">Report Lost Item</button>
+                    </form>
+                    <div id="foundItemsContainer" class="items-grid"></div>
+                </div>
+            </section>
         </main>
     </div>
 
-    <script src="js/api.js"></script>
-    <script src="js/app.js"></script>
+    <!-- Scripts - Load in order -->
+    <script src="js/config.js"></script>
+    <script src="js/api-service.js"></script>
+    <script src="js/auth-manager.js"></script>
+    <script src="js/bus-manager.js"></script>
+    <script src="js/booking-manager.js"></script>
+    <script src="js/wallet-manager.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/app-connected.js"></script>
 </body>
 </html>
