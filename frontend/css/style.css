@@ -712,3 +712,170 @@ body {
         padding: 0.6rem;
     }
 }
+/* =====================================================
+   🚀 PROFESSIONAL UI UPGRADE LAYER
+   Paste BELOW your existing CSS
+===================================================== */
+
+/* ===== Improved Color Palette ===== */
+:root {
+    --primary-color: #5B6EF5;
+    --secondary-color: #00C9A7;
+    --success-color: #2ECC71;
+    --warning-color: #F4C430;
+    --danger-color: #E74C3C;
+    --dark-color: #1E293B;
+    --light-color: #E2E8F0;
+    --text-color: #334155;
+    --border-radius: 12px;
+    --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== Smooth Global Transitions ===== */
+* {
+    transition: all 0.25s ease;
+}
+
+/* ===== Glass Navbar Upgrade ===== */
+.navbar {
+    backdrop-filter: blur(10px);
+    background: linear-gradient(135deg, #5B6EF5, #00C9A7);
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.navbar-menu a {
+    font-weight: 500;
+}
+
+.navbar-menu a:hover {
+    background: rgba(255,255,255,0.25);
+    transform: translateY(-3px);
+}
+
+/* ===== Hero Section Upgrade ===== */
+.hero {
+    padding: 3rem 1rem;
+}
+
+.hero h2 {
+    font-size: 2.8rem;
+    font-weight: 700;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* ===== Cards Premium Look ===== */
+.feature-card,
+.bus-card,
+.reservation-card,
+.item-card,
+.form-card,
+.auth-container {
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+}
+
+.feature-card:hover,
+.bus-card:hover,
+.item-card:hover {
+    transform: translateY(-8px);
+}
+
+/* ===== Buttons Upgrade ===== */
+button {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.auth-form button,
+.form-card button,
+.bus-card button {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border: none;
+}
+
+.auth-form button:hover,
+.form-card button:hover,
+.bus-card button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+/* ===== Seat Design Upgrade ===== */
+.seat {
+    border-radius: 8px;
+    font-size: 0.8rem;
+}
+
+.seat.available {
+    background: linear-gradient(135deg, #2ECC71, #00C9A7);
+}
+
+.seat.selected {
+    background: linear-gradient(135deg, #5B6EF5, #00C9A7);
+    color: white;
+}
+
+.seat.reserved {
+    background: linear-gradient(135deg, #E74C3C, #FF6B6B);
+}
+
+/* ===== Modal Premium Look ===== */
+.modal-content {
+    border-radius: 20px;
+}
+
+/* ===== Emergency Button Upgrade ===== */
+.emergency-btn {
+    background: linear-gradient(135deg, #E74C3C, #FF4D4D) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
+}
+
+/* ===== Input Field Upgrade ===== */
+input,
+select,
+textarea {
+    border-radius: 10px !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(91, 110, 245, 0.15);
+}
+
+/* ===== Smooth Page Animation ===== */
+.page {
+    animation: smoothFade 0.4s ease-in-out;
+}
+
+@keyframes smoothFade {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== Premium Scrollbar ===== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #5B6EF5, #00C9A7);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
