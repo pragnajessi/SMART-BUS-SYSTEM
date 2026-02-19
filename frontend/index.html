@@ -8,7 +8,6 @@
 </head>
 <body>
     <div id="app" class="app-container">
-        <!-- Navigation -->
         <nav class="navbar">
             <div class="navbar-brand">
                 <h1>🚌 Smart Bus Management</h1>
@@ -28,9 +27,7 @@
             </ul>
         </nav>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Home Page -->
             <section id="home" class="page">
                 <div class="hero">
                     <h2>Welcome to Smart Bus Management System</h2>
@@ -56,15 +53,12 @@
                 </div>
             </section>
 
-            <!-- Authentication Pages -->
             <section id="auth" class="page">
                 <div class="auth-container">
                     <div class="tabs">
                         <button class="tab-btn active" onclick="switchAuthTab('login')">Login</button>
                         <button class="tab-btn" onclick="switchAuthTab('register')">Register</button>
                     </div>
-
-                    <!-- Login Form -->
                     <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
                         <h2>Login</h2>
                         <input type="email" id="loginEmail" placeholder="Email" required>
@@ -72,8 +66,6 @@
                         <button type="submit">Login</button>
                         <p id="loginError" class="error-message"></p>
                     </form>
-
-                    <!-- Register Form -->
                     <form id="registerForm" class="auth-form hidden" onsubmit="handleRegister(event)">
                         <h2>Register</h2>
                         <input type="text" id="registerName" placeholder="Full Name" required>
@@ -93,36 +85,61 @@
                 </div>
             </section>
 
-            <!-- Dashboard Page -->
-            <section id="dashboard" class="page hidden">
-                <h2>Dashboard</h2>
-                <div class="dashboard-grid">
-                    <div class="stat-card">
-                        <h3>👥 Total Users</h3>
-                        <p class="stat-value" id="statTotalUsers">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>🚌 Total Buses</h3>
-                        <p class="stat-value" id="statTotalBuses">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>🎫 Total Bookings</h3>
-                        <p class="stat-value" id="statTotalBookings">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>💰 Total Revenue</h3>
-                        <p class="stat-value" id="statTotalRevenue">₹0</p>
-                    </div>
-                </div>
-            </section>
+            <section id="booking" class="page hidden">
+    <div class="booking-container">
+        <h2>Book Your Journey</h2>
+        
+        <div class="booking-steps">
+            <div class="step active">1. Select Bus</div>
+            <div class="step">2. Choose Seat</div>
+            <div class="step">3. Confirm</div>
+        </div>
 
-            <!-- Buses Page -->
+        <div id="busSelectionArea">
+            <div class="search-bar">
+                <input type="text" placeholder="Enter Destination...">
+                <button class="btn-primary">Search Buses</button>
+            </div>
+            <div id="busesList" class="bus-list-grid">
+                </div>
+        </div>
+
+        <div id="seatSelectionArea" class="hidden">
+            <div class="seat-legend">
+                <span><div class="seat available"></div> Available</span>
+                <span><div class="seat reserved"></div> Booked</span>
+                <span><div class="seat selected"></div> Selected</span>
+            </div>
+            <div id="seatGrid" class="seat-grid"></div>
+            <button onclick="confirmBooking()" class="btn-confirm">Proceed to Payment</button>
+        </div>
+    </div>
+</section>
+
             <section id="buses" class="page hidden">
                 <h2>Available Buses</h2>
                 <div id="busesContainer" class="buses-grid"></div>
             </section>
+           <section id="dashboard" class="page hidden">
+    <div class="dashboard-header">
+        <h2>System Overview</h2>
+    </div>
 
-            <!-- Wallet Page -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-info">
+                <h3>Total Users</h3>
+                <p id="statTotalUsers">0</p>
+            </div>
+        </div>
+        </div>
+
+    <div class="map-container-wrapper" style="margin-top: 30px;">
+        <h3>Live Bus Locations</h3>
+        <div id="map" style="height: 400px; width: 100%; border-radius: 12px; border: 2px solid #ddd;"></div>
+    </div>
+</section>
+
             <section id="wallet" class="page hidden">
                 <h2>My Wallet</h2>
                 <div class="wallet-container">
@@ -143,26 +160,15 @@
                 </div>
             </section>
 
-            <!-- Booking Page -->
             <section id="booking" class="page hidden">
                 <h2>Book a Bus</h2>
                 <div class="booking-container">
-                    <div class="step">
-                        <h3>Step 1: Select Bus</h3>
-                        <div id="bookingBusesList"></div>
-                    </div>
-                    <div class="step">
-                        <h3>Step 2: Select Seat</h3>
-                        <div id="bookingSeats"></div>
-                    </div>
-                    <div class="step">
-                        <h3>Step 3: Confirm</h3>
-                        <button onclick="confirmBooking()" class="btn-primary">Confirm Booking</button>
-                    </div>
+                    <div class="step"><h3>Step 1: Select Bus</h3><div id="bookingBusesList"></div></div>
+                    <div class="step"><h3>Step 2: Select Seat</h3><div id="bookingSeats"></div></div>
+                    <div class="step"><h3>Step 3: Confirm</h3><button onclick="confirmBooking()" class="btn-primary">Confirm Booking</button></div>
                 </div>
             </section>
 
-            <!-- Emergency Page -->
             <section id="emergency" class="page hidden">
                 <div class="emergency-container">
                     <h2>Emergency Alert</h2>
@@ -180,30 +186,50 @@
                 </div>
             </section>
 
-            <!-- Lost & Found Page -->
             <section id="lost-found" class="page hidden">
-                <h2>Lost & Found</h2>
-                <div class="lost-found-container">
-                    <form id="reportLostForm" class="form-card" onsubmit="reportLostItem(event)">
+                <h2>Lost & Found Portal</h2>
+                
+                <div id="matchAlert" class="notification-area hidden">
+                    <h3>📢 Notifications & Matches</h3>
+                    <div id="notificationList"></div>
+                </div>
+
+                <div class="lost-found-grid">
+                    <form id="reportLostForm" class="form-card" onsubmit="handleLostItem(event)">
                         <h3>Report Lost Item</h3>
-                        <input type="text" id="lostItemName" placeholder="Item Name" required>
-                        <textarea id="lostItemDescription" placeholder="Item Description" required></textarea>
-                        <button type="submit">Report Lost Item</button>
+                        <input type="text" id="lostItemName" placeholder="What item did you lose?" required>
+                        <div class="input-group">
+                            <input type="date" id="lostDate" required>
+                            <input type="time" id="lostTime" required>
+                        </div>
+                        <input type="email" id="lostEmail" placeholder="Your Email (for notification)" required>
+                        <input type="tel" id="lostPhone" placeholder="Phone Number" required>
+                        <textarea id="lostDescription" placeholder="Describe the item (brand, color, etc.)" required></textarea>
+                        <button type="submit" class="btn-lost">Submit Lost Report</button>
                     </form>
-                    <div id="foundItemsContainer" class="items-grid"></div>
+
+                    <form id="reportFoundForm" class="form-card" onsubmit="handleFoundItem(event)">
+                        <h3>Report Found Item</h3>
+                        <input type="text" id="foundItemName" placeholder="What item did you find?" required>
+                        <input type="text" id="foundLocation" placeholder="Address/Bus No. for collection" required>
+                        <label>Upload Photo (Optional):</label>
+                        <input type="file" id="foundPhoto" accept="image/*">
+                        <textarea id="foundDescription" placeholder="Description of the item found" required></textarea>
+                        <button type="submit" class="btn-found">Submit Found Report</button>
+                    </form>
+                </div>
+
+                <div class="items-display">
+                    <h3>Recently Reported Items</h3>
+                    <div id="foundItemsContainer" class="items-grid">
+                        </div>
                 </div>
             </section>
         </main>
     </div>
-
-    <!-- ⭐ IMPORTANT: Load scripts in EXACT order ⭐ -->
-    <script src="js/config.js"></script>
-    <script src="js/api-service.js"></script>
-    <script src="js/auth-manager.js"></script>
-    <script src="js/bus-manager.js"></script>
-    <script src="js/booking-manager.js"></script>
-    <script src="js/wallet-manager.js"></script>
-    <script src="js/dashboard.js"></script>
-    <script src="js/app-connected.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/voice-manager.js"></script>
+<script src="js/transit-monitor.js"></script> <script src="js/dashboard.js"></script>
+<script src="js/app-connected.js"></script>
 </body>
 </html>
