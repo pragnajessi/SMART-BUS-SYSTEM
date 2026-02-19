@@ -1,13 +1,34 @@
-"""
-API Routes - All endpoints
-"""
-
-from flask import Blueprint, request, jsonify
+import random
 from datetime import datetime
+from flask import Blueprint, request, jsonify
 from database import db, User, Bus, Seat, Wallet
 
-# Create blueprint
-api = Blueprint('api', __name__, url_prefix='/api')
+# 1. INITIALIZE BLUEPRINT FIRST (Fixes the NameError)
+api = Blueprint('api', __name__)
+
+# ==================== GPS & TRACKING ====================
+
+@api.route('/bus/location/<int:bus_id>', methods=['GET'])
+def get_bus_location(bus_id):
+    try:
+        bus = Bus.query.get(bus_id)
+        if not bus:
+            return jsonify({'error': 'Bus not found'}), 404
+
+        # DEVELOPMENT MOCK: Generate coordinates near Delhi to test map/voice
+        mock_lat = 28.6139 + (random.uniform(-0.01, 0.01))
+        mock_lng = 77.2090 + (random.uniform(-0.01, 0.01))
+
+        return jsonify({
+            'bus_id': bus_id,
+            'bus_number': bus.bus_number,
+            'latitude': mock_lat,
+            'longitude': mock_lng,
+            'last_updated': datetime.utcnow().isoformat()
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 # ==================== AUTHENTICATION ====================
 
@@ -15,7 +36,6 @@ api = Blueprint('api', __name__, url_prefix='/api')
 def register():
     try:
         data = request.json
-        
         if User.query.filter_by(email=data['email']).first():
             return jsonify({'message': 'Email already registered'}), 400
         
@@ -27,7 +47,6 @@ def register():
             password=data['password'],
             account_type=data.get('account_type', 'passenger')
         )
-        
         db.session.add(user)
         db.session.commit()
         
@@ -35,240 +54,85 @@ def register():
         db.session.add(wallet)
         db.session.commit()
         
-        return jsonify({
-            'message': 'Registration successful',
-            'user_id': user.id,
-            'name': user.name
-        }), 201
+        return jsonify({'message': 'Registration successful', 'user_id': user.id}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
 
 @api.route('/auth/login', methods=['POST'])
 def login():
     try:
         data = request.json
         user = User.query.filter_by(email=data['email']).first()
-        
         if user and user.password == data['password']:
             return jsonify({
                 'message': 'Login successful',
                 'user_id': user.id,
                 'name': user.name,
-                'email': user.email,
                 'account_type': user.account_type
             }), 200
-        
         return jsonify({'message': 'Invalid credentials'}), 401
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
-# ==================== BUSES ====================
+# ==================== BUSES & SEATS ====================
 
 @api.route('/buses', methods=['GET'])
 def get_buses():
     try:
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 10, type=int)
-        
-        buses = Bus.query.filter_by(status='active').paginate(page=page, per_page=per_page)
-        
+        buses = Bus.query.filter_by(status='active').all()
         return jsonify({
             'buses': [{
-                'id': bus.id,
-                'bus_number': bus.bus_number,
-                'driver_name': bus.driver_name,
-                'route': bus.route,
-                'total_seats': bus.total_seats,
-                'available_seats': sum(1 for seat in bus.seats if not seat.is_reserved),
-            } for bus in buses.items],
-            'total': buses.total,
-            'pages': buses.pages,
-            'current_page': page
+                'id': b.id,
+                'bus_number': b.bus_number,
+                'route': b.route,
+                'available_seats': sum(1 for s in b.seats if not s.is_reserved)
+            } for b in buses]
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-
-@api.route('/buses', methods=['POST'])
-def create_bus():
-    try:
-        data = request.json
-        bus = Bus(
-            bus_number=data['bus_number'],
-            driver_name=data['driver_name'],
-            driver_phone=data['driver_phone'],
-            total_seats=data.get('total_seats', 50),
-            route=data['route'],
-            status='active'
-        )
-        
-        db.session.add(bus)
-        db.session.commit()
-        
-        women_seats = int(bus.total_seats * 0.2)
-        for seat_num in range(1, bus.total_seats + 1):
-            seat = Seat(
-                bus_id=bus.id,
-                seat_number=seat_num,
-                is_women_seat=(seat_num <= women_seats)
-            )
-            db.session.add(seat)
-        
-        db.session.commit()
-        
-        return jsonify({
-            'message': 'Bus created successfully',
-            'bus_id': bus.id
-        }), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-
-
-@api.route('/buses/<int:bus_id>/seats', methods=['GET'])
-def get_seats(bus_id):
-    try:
-        seats = Seat.query.filter_by(bus_id=bus_id).all()
-        
-        return jsonify([{
-            'seat_id': seat.id,
-            'seat_number': seat.seat_number,
-            'is_reserved': seat.is_reserved,
-            'is_women_seat': seat.is_women_seat,
-            'reserved_by': seat.user.name if seat.user else None
-        } for seat in seats]), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
 
 @api.route('/seats/<int:seat_id>/reserve', methods=['POST'])
 def reserve_seat(seat_id):
     try:
         data = request.json
-        user_id = data['user_id']
-        
-        user = User.query.get(user_id)
+        user = User.query.get(data['user_id'])
         seat = Seat.query.get(seat_id)
         
         if not user or not seat:
-            return jsonify({'message': 'User or Seat not found'}), 404
-        
+            return jsonify({'message': 'Not found'}), 404
         if seat.is_reserved:
-            return jsonify({'message': 'Seat already reserved'}), 400
-        
+            return jsonify({'message': 'Already reserved'}), 400
         if seat.is_women_seat and user.gender != 'female':
-            return jsonify({'message': 'This is a women-only seat'}), 400
+            return jsonify({'message': 'Women-only seat'}), 400
         
         seat.is_reserved = True
-        seat.reserved_by_user_id = user_id
-        seat.reserved_at = datetime.utcnow()
+        seat.reserved_by_user_id = user.id
         db.session.commit()
-        
-        return jsonify({
-            'message': 'Seat reserved successfully',
-            'seat_number': seat.seat_number
-        }), 200
+        return jsonify({'message': 'Reserved successfully'}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 
-@api.route('/seats/<int:seat_id>/cancel', methods=['POST'])
-def cancel_reservation(seat_id):
-    try:
-        seat = Seat.query.get(seat_id)
-        
-        if not seat:
-            return jsonify({'message': 'Seat not found'}), 404
-        
-        if not seat.is_reserved:
-            return jsonify({'message': 'Seat is not reserved'}), 400
-        
-        seat.is_reserved = False
-        seat.reserved_by_user_id = None
-        seat.reserved_at = None
-        db.session.commit()
-        
-        return jsonify({'message': 'Reservation cancelled'}), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-
-
-# ==================== WALLET ====================
+# ==================== WALLET & STATS ====================
 
 @api.route('/wallet/<int:user_id>', methods=['GET'])
 def get_wallet(user_id):
-    try:
-        wallet = Wallet.query.filter_by(user_id=user_id).first()
-        
-        if not wallet:
-            wallet = Wallet(user_id=user_id, balance=0)
-            db.session.add(wallet)
-            db.session.commit()
-        
-        return jsonify({
-            'wallet_id': wallet.id,
-            'balance': wallet.balance,
-            'currency': 'INR'
-        }), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@api.route('/wallet/<int:user_id>/add-money', methods=['POST'])
-def add_wallet_money(user_id):
-    try:
-        data = request.json
-        amount = data['amount']
-        
-        wallet = Wallet.query.filter_by(user_id=user_id).first()
-        if not wallet:
-            wallet = Wallet(user_id=user_id, balance=0)
-            db.session.add(wallet)
-            db.session.commit()
-        
-        wallet.balance += amount
+    wallet = Wallet.query.filter_by(user_id=user_id).first()
+    if not wallet:
+        wallet = Wallet(user_id=user_id, balance=0)
+        db.session.add(wallet)
         db.session.commit()
-        
-        return jsonify({
-            'message': 'Money added',
-            'new_balance': wallet.balance
-        }), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-
-
-# ==================== STATISTICS ====================
+    return jsonify({'balance': wallet.balance}), 200
 
 @api.route('/statistics/dashboard', methods=['GET'])
 def get_statistics():
-    try:
-        stats = {
-            'total_users': User.query.count(),
-            'total_buses': Bus.query.count(),
-            'active_buses': Bus.query.filter_by(status='active').count(),
-            'total_bookings': 0,
-            'confirmed_bookings': 0,
-            'total_revenue': 0,
-            'user_stats': {
-                'total_users': User.query.count(),
-                'passengers': User.query.filter_by(account_type='passenger').count(),
-                'drivers': User.query.filter_by(account_type='driver').count(),
-                'workers': User.query.filter_by(account_type='worker').count()
-            },
-            'payment_stats': {
-                'total_payments': 0,
-                'completed': 0,
-                'failed': 0,
-                'refunded': 0
-            }
-        }
-        
-        return jsonify(stats), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    confirmed = Seat.query.filter_by(is_reserved=True).count()
+    return jsonify({
+        'total_users': User.query.count(),
+        'total_buses': Bus.query.count(),
+        'total_bookings': confirmed,
+        'total_revenue': confirmed * 250
+    }), 200
