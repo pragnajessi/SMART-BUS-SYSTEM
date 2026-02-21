@@ -95,3 +95,35 @@ const API_CONFIG = {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = API_CONFIG;
 }
+/**
+ * Configuration File
+ */
+
+const config = {
+  // API Configuration
+  apiUrl: 'http://localhost:5000/api',
+  // apiUrl: 'https://your-production-api.com/api', // For production
+  
+  // Application Settings
+  appName: 'Smart Bus System',
+  appVersion: '1.0.0',
+  
+  // Feature Flags
+  features: {
+    locationTracking: true,
+    voiceAnnouncements: true,
+    paymentIntegration: true,
+    adminDashboard: true,
+  },
+
+  // Timeout settings
+  requestTimeout: 30000, // 30 seconds
+
+  // Logging
+  debug: true, // Set to false in production
+};
+
+// Export for use in other files
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = config;
+}
