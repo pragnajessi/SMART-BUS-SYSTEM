@@ -4,78 +4,164 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real-time GPS Tracking - Smart Bus Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="css/gps-style.css">
     <link rel="stylesheet" href="css/style.css">
-
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
 </head>
 <body>
 
 <!-- Navigation -->
-        <nav class="navbar">
-            <div class="navbar-brand">
-                <h1>🚌 Smart Bus Management</h1>
-            </div>
-            
-    
-  
-       <ul class="navbar-menu">
-       <li><a href="index.html">Home</a></li>
-       <li><a href="index.html#buses">Buses</a></li>
-       <li><a href="admin-dashboard.html">Dashboard</a></li>
+<nav class="navbar">
+    <div class="navbar-brand">
+        <h1>🚌 Smart Bus Management</h1>
+    </div>
+    <ul class="navbar-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index.html#buses">Buses</a></li>
+        <li><a href="index.html#dashboard">Dashboard</a></li>
         <li><a href="index.html#wallet">Wallet</a></li>
         <li><a href="index.html#booking">Booking</a></li>
-        <li><a href="gps-tracking.html">Emergency / GPS</a></li>
+        <li><a href="gps-tracking.html" class="active">Emergency / GPS</a></li>
         <li><a href="index.html#lost-found">Lost & Found</a></li>
-</ul>
-
+    </ul>
 </nav>
 
-    <div class="gps-container">
-        <!-- Sidebar -->
-        <aside class="gps-sidebar">
-            <div class="sidebar-header">
-                <h2>🗺️ GPS Tracking</h2>
+<div class="gps-container">
+    <!-- Sidebar -->
+    <aside class="gps-sidebar">
+        <div class="sidebar-header">
+            <h2>🗺️ GPS Tracking Dashboard</h2>
+            <p>Real-time location & route monitoring</p>
+        </div>
+
+        <!-- Error/Success Messages -->
+        <div id="errorMessage" class="alert alert-error" style="display: none;"></div>
+        <div id="successMessage" class="alert alert-success" style="display: none;"></div>
+
+        <!-- Tracking Control Section -->
+        <div class="tracking-controls-section">
+            <h3>📍 Tracking Controls</h3>
+            <div class="control-buttons">
+                <button id="startTrackingBtn" class="btn btn-start-tracking" onclick="startTracking()">
+                    <i class="fas fa-play"></i>
+                    <span>Start Tracking</span>
+                </button>
+                <button id="stopTrackingBtn" class="btn btn-stop-tracking" onclick="stopTracking()" style="display: none;">
+                    <i class="fas fa-stop"></i>
+                    <span>Stop Tracking</span>
+                </button>
+                <button id="voiceAnnouncementBtn" class="btn btn-voice-announcement" onclick="toggleVoiceAnnouncements()" disabled>
+                    <i class="fas fa-volume-mute"></i>
+                    <span>Listen Announcements</span>
+                </button>
             </div>
+        </div>
 
-            <div class="search-box">
-                <input type="text" id="searchBus" placeholder="Search bus..." onkeyup="searchBuses()">
-            </div>
-
-            <div class="buses-list">
-                <h3>Active Buses</h3>
-                <div id="busesList" class="buses-items"></div>
-            </div>
-
-            <div class="bus-info" id="busInfo" style="display: none;">
-                <h3>Bus Details</h3>
-                <div id="busDetailsContent"></div>
-            </div>
-        </aside>
-
-        <!-- Map Container -->
-        <main class="gps-main">
-            <div id="map" class="map-container"></div>
-
-            <!-- GPS Controls -->
-            <div class="gps-controls">
-                <button onclick="centerMap()" class="control-btn" title="Center Map">📍</button>
-                <button onclick="toggleTracking()" class="control-btn" title="Toggle Tracking">🔄</button>
-                <button onclick="zoomIn()" class="control-btn" title="Zoom In">🔍+</button>
-                <button onclick="zoomOut()" class="control-btn" title="Zoom Out">🔍-</button>
-            </div>
-
-            <!-- Bus Info Popup -->
-            <div id="busPopup" class="bus-popup hidden">
-                <div class="popup-content">
-                    <span class="close-popup" onclick="closeBusPopup()">&times;</span>
-                    <h3 id="popupBusNumber"></h3>
-                    <div id="popupBusInfo"></div>
+        <!-- Status Section -->
+        <div class="status-section">
+            <h3>📊 Status</h3>
+            <div class="status-item">
+                <span class="status-label">Tracking</span>
+                <div class="status-value">
+                    <span class="status-indicator inactive" id="trackingIndicator"></span>
+                    <span id="trackingStatus">Inactive</span>
                 </div>
             </div>
-        </main>
-    </div>
+            <div class="status-item">
+                <span class="status-label">Voice</span>
+                <div class="status-value">
+                    <span class="status-indicator inactive" id="voiceIndicator"></span>
+                    <span id="voiceStatus">Off</span>
+                </div>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Signal</span>
+                <span id="signalQuality">--</span>
+            </div>
+        </div>
 
-    <script src="js/gps-tracking.js"></script>
+        <!-- Current Location Card -->
+        <div id="currentLocationCard" class="info-card" style="display: none;">
+            <h3><i class="fas fa-map-marker-alt"></i> Current Location</h3>
+            <div class="card-content">
+                <p><strong>Latitude:</strong><br><span id="currentLat">--</span></p>
+                <p><strong>Longitude:</strong><br><span id="currentLng">--</span></p>
+                <p><strong>Accuracy:</strong><br><span id="currentAccuracy">--</span></p>
+                <p><strong>Updated:</strong><br><span id="locationTime">--</span></p>
+            </div>
+        </div>
+
+        <!-- Next Stop Card -->
+        <div id="nextStopCard" class="info-card" style="display: none;">
+            <h3><i class="fas fa-bus-alt"></i> Next Stop</h3>
+            <div class="card-content">
+                <p><strong>Stop Name:</strong><br><span id="nextStopName">--</span></p>
+                <p><strong>Distance:</strong><br><span id="nextStopDistance">--</span></p>
+                <p><strong>Est. Time:</strong><br><span id="nextStopTime">--</span></p>
+            </div>
+        </div>
+
+        <!-- Bus Info Card -->
+        <div id="busInfoCard" class="info-card" style="display: none;">
+            <h3><i class="fas fa-bus"></i> Bus Information</h3>
+            <div class="card-content">
+                <p><strong>Bus ID:</strong><br><span id="busId">--</span></p>
+                <p><strong>Route:</strong><br><span id="busRoute">--</span></p>
+                <p><strong>Driver:</strong><br><span id="busDriver">--</span></p>
+            </div>
+        </div>
+
+        <!-- Search Box -->
+        <div class="search-box">
+            <input type="text" id="searchBus" placeholder="Search bus..." onkeyup="searchBuses()">
+        </div>
+
+        <!-- Active Buses List -->
+        <div class="buses-list">
+            <h3>Active Buses</h3>
+            <div id="busesList" class="buses-items"></div>
+        </div>
+    </aside>
+
+    <!-- Main Map Area -->
+    <main class="gps-main">
+        <div id="map" class="map-container"></div>
+
+        <!-- GPS Controls -->
+        <div class="gps-controls">
+            <button onclick="centerMap()" class="control-btn" title="Center Map">
+                <i class="fas fa-location-dot"></i>
+            </button>
+            <button onclick="toggleTracking()" class="control-btn" title="Toggle Tracking">
+                <i class="fas fa-sync"></i>
+            </button>
+            <button onclick="zoomIn()" class="control-btn" title="Zoom In">
+                <i class="fas fa-magnifying-glass-plus"></i>
+            </button>
+            <button onclick="zoomOut()" class="control-btn" title="Zoom Out">
+                <i class="fas fa-magnifying-glass-minus"></i>
+            </button>
+        </div>
+
+        <!-- Bus Info Popup -->
+        <div id="busPopup" class="bus-popup hidden">
+            <div class="popup-content">
+                <span class="close-popup" onclick="closeBusPopup()">&times;</span>
+                <h3 id="popupBusNumber"></h3>
+                <div id="popupBusInfo"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/config.js"></script>
+<script src="js/api-service.js"></script>
+<script src="js/services/busService.js"></script>
+<script src="js/services/dashboardService.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/gps-tracking.js"></script>
+
 </body>
 </html>
