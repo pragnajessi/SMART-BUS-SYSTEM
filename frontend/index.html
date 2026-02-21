@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Bus Management System</title>
     <link rel="stylesheet" href="css/style.css">
+
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        /* Dashboard additions (non‑destructive) */
+        .dashboard-container { padding: 20px; }
+        .dashboard-controls { margin: 15px 0; display:flex; gap:10px; flex-wrap:wrap; }
+        #map { height: 420px; width: 100%; border-radius: 10px; margin-top: 15px; }
+        .btn-danger { background:#e74c3c; color:#fff; }
+        .btn-voice { background:#27ae60; color:#fff; }
+        .tracking-status { margin-top:10px; font-weight:600; }
+    </style>
 </head>
 <body>
     <div id="app" class="app-container">
@@ -85,60 +99,80 @@
                 </div>
             </section>
 
-            <section id="booking" class="page hidden">
-    <div class="booking-container">
-        <h2>Book Your Journey</h2>
-        
-        <div class="booking-steps">
-            <div class="step active">1. Select Bus</div>
-            <div class="step">2. Choose Seat</div>
-            <div class="step">3. Confirm</div>
-        </div>
+            <!-- ================= UPDATED DASHBOARD (ADDED ONLY) ================= -->
+            <section id="dashboard" class="page hidden">
+                <div class="dashboard-container">
+                    <h2>📍 Live Bus Tracking Dashboard</h2>
 
-        <div id="busSelectionArea">
-            <div class="search-bar">
-                <input type="text" placeholder="Enter Destination...">
-                <button class="btn-primary">Search Buses</button>
-            </div>
-            <div id="busesList" class="bus-list-grid">
+                    <div class="dashboard-controls">
+                        <button id="startTrackingBtn" class="btn-primary">▶️ Start Tracking</button>
+                        <button id="stopTrackingBtn" class="btn-primary btn-danger">⏹️ Stop Tracking</button>
+                        <button id="voiceToggleBtn" class="btn-primary btn-voice">🔊 Voice: OFF</button>
+                    </div>
+
+                    <div class="tracking-status" id="trackingStatus">Status: Not tracking</div>
+                    <div class="tracking-status" id="nextStopInfo"></div>
+
+                    <div id="map"></div>
                 </div>
-        </div>
+            </section>
+            <!-- ================= END DASHBOARD ================= -->
 
-        <div id="seatSelectionArea" class="hidden">
-            <div class="seat-legend">
-                <span><div class="seat available"></div> Available</span>
-                <span><div class="seat reserved"></div> Booked</span>
-                <span><div class="seat selected"></div> Selected</span>
-            </div>
-            <div id="seatGrid" class="seat-grid"></div>
-            <button onclick="confirmBooking()" class="btn-confirm">Proceed to Payment</button>
-        </div>
-    </div>
-</section>
+            <section id="booking" class="page hidden">
+                <div class="booking-container">
+                    <h2>Book Your Journey</h2>
+                    
+                    <div class="booking-steps">
+                        <div class="step active">1. Select Bus</div>
+                        <div class="step">2. Choose Seat</div>
+                        <div class="step">3. Confirm</div>
+                    </div>
+
+                    <div id="busSelectionArea">
+                        <div class="search-bar">
+                            <input type="text" placeholder="Enter Destination...">
+                            <button class="btn-primary">Search Buses</button>
+                        </div>
+                        <div id="busesList" class="bus-list-grid"></div>
+                    </div>
+
+                    <div id="seatSelectionArea" class="hidden">
+                        <div class="seat-legend">
+                            <span><div class="seat available"></div> Available</span>
+                            <span><div class="seat reserved"></div> Booked</span>
+                            <span><div class="seat selected"></div> Selected</span>
+                        </div>
+                        <div id="seatGrid" class="seat-grid"></div>
+                        <button onclick="confirmBooking()" class="btn-confirm">Proceed to Payment</button>
+                    </div>
+                </div>
+            </section>
 
             <section id="buses" class="page hidden">
                 <h2>Available Buses</h2>
                 <div id="busesContainer" class="buses-grid"></div>
-            </section>
-           <section id="dashboard" class="page hidden">
-    <div class="dashboard-header">
-        <h2>System Overview</h2>
-    </div>
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-info">
-                <h3>Total Users</h3>
-                <p id="statTotalUsers">0</p>
-            </div>
-        </div>
-        </div>
+<!-- Load services first -->
+<script src="js/config.js"></script>
+<script src="js/api-service.js"></script>
+<script src="js/services/busService.js"></script>
+<script src="js/services/dashboardService.js"></script>
 
-    <div class="map-container-wrapper" style="margin-top: 30px;">
-        <h3>Live Bus Locations</h3>
-        <div id="map" style="height: 400px; width: 100%; border-radius: 12px; border: 2px solid #ddd;"></div>
-    </div>
+<!-- Load Leaflet -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Load dashboard scripts -->
+<script src="js/dashboard-gps.js"></script>
+<script src="js/dashboard.js"></script>
+
+<!-- Load app -->
+<script src="js/app.js"></script>
+<script src="js/app-connected.js"></script>
+<!-- END DASHBOARD SECTION -->
 </section>
+  
+  
+  
 
             <section id="wallet" class="page hidden">
                 <h2>My Wallet</h2>
@@ -157,15 +191,6 @@
                         <h3>Recent Transactions</h3>
                         <div id="transactionsTable"></div>
                     </div>
-                </div>
-            </section>
-
-            <section id="booking" class="page hidden">
-                <h2>Book a Bus</h2>
-                <div class="booking-container">
-                    <div class="step"><h3>Step 1: Select Bus</h3><div id="bookingBusesList"></div></div>
-                    <div class="step"><h3>Step 2: Select Seat</h3><div id="bookingSeats"></div></div>
-                    <div class="step"><h3>Step 3: Confirm</h3><button onclick="confirmBooking()" class="btn-primary">Confirm Booking</button></div>
                 </div>
             </section>
 
@@ -221,15 +246,74 @@
 
                 <div class="items-display">
                     <h3>Recently Reported Items</h3>
-                    <div id="foundItemsContainer" class="items-grid">
-                        </div>
+                    <div id="foundItemsContainer" class="items-grid"></div>
                 </div>
             </section>
         </main>
     </div>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/voice-manager.js"></script>
-<script src="js/transit-monitor.js"></script> <script src="js/dashboard.js"></script>
+<script src="js/transit-monitor.js"></script>
+<script src="js/dashboard.js"></script>
 <script src="js/app-connected.js"></script>
+
+<!-- ===== Dashboard Auto Tracking Logic ===== -->
+<script>
+let map, marker, mapReady=false;
+
+function initMap(lat=20.5937,lng=78.9629){
+    if(mapReady) return;
+    map=L.map('map').setView([lat,lng],13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap'}).addTo(map);
+    marker=L.marker([lat,lng]).addTo(map);
+    mapReady=true;
+}
+
+function updateMap(loc){
+    if(!mapReady) initMap(loc.latitude,loc.longitude);
+    const pos=[loc.latitude,loc.longitude];
+    marker.setLatLng(pos);
+    map.setView(pos,15);
+}
+
+function updateNextStopUI(stop){
+    if(!stop) return;
+    document.getElementById('nextStopInfo').textContent=
+        `Next Stop: ${stop.name} (${Number(stop.distance||0).toFixed(2)} km)`;
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+    initMap();
+
+    const startBtn=document.getElementById('startTrackingBtn');
+    const stopBtn=document.getElementById('stopTrackingBtn');
+    const voiceBtn=document.getElementById('voiceToggleBtn');
+    const statusEl=document.getElementById('trackingStatus');
+
+    if(startBtn) startBtn.onclick=()=>{
+        const started=dashboardManager.startTracking(
+            (loc)=>{ updateMap(loc); statusEl.textContent='Status: Tracking active'; },
+            (err)=>alert(err)
+        );
+        if(started) statusEl.textContent='Status: Tracking started...';
+    };
+
+    if(stopBtn) stopBtn.onclick=()=>{
+        dashboardManager.stopTracking();
+        statusEl.textContent='Status: Tracking stopped';
+    };
+
+    if(voiceBtn) voiceBtn.onclick=()=>{
+        const enabled=dashboardManager.toggleVoiceAnnouncements();
+        voiceBtn.textContent=enabled?'🔊 Voice: ON':'🔊 Voice: OFF';
+    };
+
+    setInterval(()=>{
+        const stop=dashboardManager.getNextStop();
+        if(stop) updateNextStopUI(stop);
+    },3000);
+});
+</script>
 </body>
 </html>
